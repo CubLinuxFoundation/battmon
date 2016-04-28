@@ -40,13 +40,13 @@
 #
 # Quit function
 function quit_monitoring(){
-YADPID=$(cat /tmp/yadpid.tmp | awk '{print $1}')
-rm -f /tmp/yadpid.tmp
-kill -9 $YADPID > /dev/null 2>&1 &
-wait;
-killall battmon > /dev/null 2>&1 &
-wait;
-exit 0
+    YADPID=$(cat /tmp/yadpid.tmp | awk '{print $1}')
+    rm -f /tmp/yadpid.tmp
+    kill -9 $YADPID > /dev/null 2>&1 &
+    wait;
+    killall battmon > /dev/null 2>&1 &
+    wait;
+    exit 0
 }
 #
 ################### USER INTERACTION ######################
@@ -61,15 +61,15 @@ HIB=0
 while getopts s:bhgfqu opt
 do
     case "$opt" in
-      s)  DELAY="$OPTARG";;
-      b)  BEEP=1;;
-      h)  HIB=1;;
-      g)  GTK=1;;
-      f)  ls "/usr/share/battmon/icons" | sed 's/[*]//'  # print icon filenames and exit
-          exit 0;;
-      q)  quit_monitoring;;  # kill script and all yad instances associated with it
-      u|\?)		   # unknown flag
-      	  echo >&2 \
+	s)  DELAY="$OPTARG";;
+	b)  BEEP=1;;
+	h)  HIB=1;;
+	g)  GTK=1;;
+	f)  ls "/usr/share/battmon/icons" | sed 's/[*]//'  # print icon filenames and exit
+            exit 0;;
+	q)  quit_monitoring;;  # kill script and all yad instances associated with it
+	u|\?)		   # unknown flag
+      	    echo >&2 \
 "
 battmon - acpi battery monitor applet
 designed for Cub Linux by RichJack, 2015, 2016
@@ -152,219 +152,219 @@ fi
 #
 # Check for existence of a battery first
 function is_battery(){
-if [[ -z $(dir /sys/class/power_supply/ | grep BAT*) ]];then
-    BATT=0
-    PLUGGED=0
-    BRIGHT=
-else
-    BATT=1
-    BRIGHT="Brightness!battmon-brightness!system-brightness|"
-fi
+    if [[ -z $(dir /sys/class/power_supply/ | grep BAT*) ]];then
+	BATT=0
+	PLUGGED=0
+	BRIGHT=
+    else
+	BATT=1
+	BRIGHT="Brightness!battmon-brightness!system-brightness|"
+    fi
 }
 # Set some indexes to be used later in the script
 # It is possible for someone to plug and unplug the AC adapter a few times
 # during the same battmon cycle, so these should be reset each time
 function index(){
-i=1
-j=1
-k=1
-m=1
-X=60
+    i=1
+    j=1
+    k=1
+    m=1
+    X=60
 }
 
 ########################### Main functions #########################
 # Create system tray icon using yad
 function mains_power(){
-# Just send the ac-adapter icon and static tooltip
-echo "icon:$ICON_DIR$ICON_AC" >&3 
-echo "tooltip:Running off mains power." >&3
+    # Just send the ac-adapter icon and static tooltip
+    echo "icon:$ICON_DIR$ICON_AC" >&3 
+    echo "tooltip:Running off mains power." >&3
 }
 
 function systray(){
-# Gather information on current battery status
-PLUGGED=$(acpi -a | awk -F ": " '{print $2}')
-CHARGE=$(acpi -b | awk -F ", " '{print $2}' | sed 's/%//')
-INFO=$(acpi -b | awk -F ": " '{print $2}' | awk -F "," '{print $1 " -" $2 "," $3}')
+    # Gather information on current battery status
+    PLUGGED=$(acpi -a | awk -F ": " '{print $2}')
+    CHARGE=$(acpi -b | awk -F ", " '{print $2}' | sed 's/%//')
+    INFO=$(acpi -b | cut -d' ' -f3- | sed 's/,/ -/')
 
-# Set the appropriate tray icon for the battery level
-case $PLUGGED in 
-   ("on-line")
-	# If we get a null charge status, then show AC icon as we are at least 
-    # plugged in eg if the battery falls out!
-	if [ -z $CHARGE ]; then	
+    # Set the appropriate tray icon for the battery level
+    case $PLUGGED in 
+	("on-line")
+	    # If we get a null charge status, then show AC icon as we are at least 
+	    # plugged in eg if the battery falls out!
+	    if [ -z $CHARGE ]; then	
 		echo "icon:$ICON_DIR$ICON_AC" >&3 
 		echo "tooltip:Battery status unknown or missing: $PLUGGED" >&3
-	elif [ $CHARGE -ge 90 ]; then
+	    elif [ $CHARGE -ge 90 ]; then
 		echo "icon:$ICON_DIR$ICON_C90_100" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 78 ]; then
+	    elif [ $CHARGE -ge 78 ]; then
 		echo "icon:$ICON_DIR$ICON_C78_89" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 66 ]; then
+	    elif [ $CHARGE -ge 66 ]; then
 		echo "icon:$ICON_DIR$ICON_C66_77" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 54 ]; then
+	    elif [ $CHARGE -ge 54 ]; then
 		echo "icon:$ICON_DIR$ICON_C54_65" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 42 ]; then
+	    elif [ $CHARGE -ge 42 ]; then
 		echo "icon:$ICON_DIR$ICON_C42_53" >&3
 		echo "tooltip:Battery status: $INFO." >&3		
-	elif [ $CHARGE -ge 30 ]; then
+	    elif [ $CHARGE -ge 30 ]; then
 		echo "icon:$ICON_DIR$ICON_C30_41" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 20 ]; then
+	    elif [ $CHARGE -ge 20 ]; then
 		echo "icon:$ICON_DIR$ICON_C20_29" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 10 ]; then
+	    elif [ $CHARGE -ge 10 ]; then
 		echo "icon:$ICON_DIR$ICON_C10_19" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-   	elif [ $CHARGE -ge 6 ]; then
+   	    elif [ $CHARGE -ge 6 ]; then
 		echo "icon:$ICON_DIR$ICON_C6_9" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -le 5 ]; then
+	    elif [ $CHARGE -le 5 ]; then
 		echo "icon:$ICON_DIR$ICON_C0_5" >&3 
 		echo "tooltip:Battery status: $INFO." >&3
-	fi
-	;;
-   ("off-line")
-	# If we get a null charge status, then we can't monitor properly
-	if [ -z $CHARGE ]; then	
+	    fi
+	    ;;
+	("off-line")
+	    # If we get a null charge status, then we can't monitor properly
+	    if [ -z $CHARGE ]; then	
 		echo "icon:$ICON_DIR$ICON_D0_5" >&3 
 		echo "tooltip:$PLUGGED: Battery status unknown." >&3
-	elif [ $CHARGE -ge 90 ]; then
+	    elif [ $CHARGE -ge 90 ]; then
 		echo "icon:$ICON_DIR$ICON_D90_100" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 78 ]; then
+	    elif [ $CHARGE -ge 78 ]; then
 		echo "icon:$ICON_DIR$ICON_D78_89" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 66 ]; then
+	    elif [ $CHARGE -ge 66 ]; then
 		echo "icon:$ICON_DIR$ICON_D66_77" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 54 ]; then
+	    elif [ $CHARGE -ge 54 ]; then
 		echo "icon:$ICON_DIR$ICON_D54_65" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 42 ]; then
+	    elif [ $CHARGE -ge 42 ]; then
 		echo "icon:$ICON_DIR$ICON_D42_53" >&3
 		echo "tooltip:Battery status: $INFO." >&3		
-	elif [ $CHARGE -ge 30 ]; then
+	    elif [ $CHARGE -ge 30 ]; then
 		echo "icon:$ICON_DIR$ICON_D30_41" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 20 ]; then
+	    elif [ $CHARGE -ge 20 ]; then
 		echo "icon:$ICON_DIR$ICON_D20_29" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -ge 10 ]; then
+	    elif [ $CHARGE -ge 10 ]; then
 		echo "icon:$ICON_DIR$ICON_D10_19" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-   	elif [ $CHARGE -ge 6 ]; then
+   	    elif [ $CHARGE -ge 6 ]; then
 		echo "icon:$ICON_DIR$ICON_D6_9" >&3
 		echo "tooltip:Battery status: $INFO." >&3
-	elif [ $CHARGE -le 5 ]; then
+	    elif [ $CHARGE -le 5 ]; then
 		echo "icon:$ICON_DIR$ICON_D0_5" >&3 
 		echo "tooltip:Battery status: $INFO." >&3
-	fi
-	;;
-   (*)  # In case of an error message or null value return from acpi
-	echo "icon:$ICON_DIR$ICON_ERR" >&3 
-	notify-send "Battery error" "Battery error – unknown error, exiting in 10 seconds…" -i $ICON_DIR$ICON_ERR
-	echo "tooltip:Battery error" >&3
-	sleep 10
-	exit 1
-	;;
-esac
+	    fi
+	    ;;
+	(*)  # In case of an error message or null value return from acpi
+	    echo "icon:$ICON_DIR$ICON_ERR" >&3 
+	    notify-send "Battery error" "Battery error – unknown error, exiting in 10 seconds…" -i $ICON_DIR$ICON_ERR
+	    echo "tooltip:Battery error" >&3
+	    sleep 10
+	    exit 1
+	    ;;
+    esac
 }
 
 # Warning messages via tray baloon dialog at 20, 15 and 10% remaining
 function warning_le20(){
-notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
-let i=i+1
+    notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
+    let i=i+1
 }
 function warning_le15(){
-notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
-let j=j+1
+    notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
+    let j=j+1
 }
 function warning_le10(){
-notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
-let k=k+1
+    notify-send "Battery charge is low" "Warning, battery charge has only ${CHARGE}% remaining." -i $ICON_DIR$ICON_D10_19
+    let k=k+1
 }
 
 # Final warning message at 5% before battery runs out
 function warning_critical(){
-if [ $BEEP = 1 ]; then
+    if [ $BEEP = 1 ]; then
 	echo -en "\x07"
-fi
-if [ $HIB = 0 ]; then
+    fi
+    if [ $HIB = 0 ]; then
 	notify-send "Battery charge is critical" "Warning, battery charge has only ${CHARGE}% remaining.\nSwitch to mains power immediately or save all work now!\nComputer will loose power imminently…" -i $ICON_DIR$ICON_D0_5
-elif [ $HIB = 1 ]; then
+    elif [ $HIB = 1 ]; then
 	while [ $X -ge 1 ]; do
-		notify-send "Battery charge is critical" "Warning, battery charge has only ${CHARGE}% remaining.\nSwitch to mains power immediately or save all work now!\nComputer will hibernate in $X seconds…" -i $ICON_DIR$ICON_D0_5
-		PLUGGED2=$(acpi -a | awk -F ": " '{print $2}')
-		if [[ "$PLUGGED2" == "on-line" ]]; then
-			break
-		fi
-		sleep 5
-		let X=X-5
+	    notify-send "Battery charge is critical" "Warning, battery charge has only ${CHARGE}% remaining.\nSwitch to mains power immediately or save all work now!\nComputer will hibernate in $X seconds…" -i $ICON_DIR$ICON_D0_5
+	    PLUGGED2=$(acpi -a | awk -F ": " '{print $2}')
+	    if [[ "$PLUGGED2" == "on-line" ]]; then
+		break
+	    fi
+	    sleep 5
+	    let X=X-5
 	done
 	# One last chance to plug in!
 	PLUGGED2=$(acpi -a | awk -F ": " '{print $2}')
 	if [[ "$PLUGGED2" == "on-line" ]]; then
-		systray
-		index
+	    systray
+	    index
 	elif [[ "$PLUGGED2" == "off-line" ]]; then
-		notify-send "Battery charge is critical" "Preparing to hibernate computer…" -i $ICON_DIR$ICON_D0_5
-		dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
+	    notify-send "Battery charge is critical" "Preparing to hibernate computer…" -i $ICON_DIR$ICON_D0_5
+	    dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
 	fi
-fi	
+    fi	
 }
 
 # Main monitoring function to monitor battery status and do something if there 
 # is a change in status
 function monitoring(){
-case $PLUGGED in 
-   ("on-line")
-	systray
-	index
-	;;
-   ("off-line")
-	if [ $CHARGE -gt 20 ]; then
+    case $PLUGGED in 
+	("on-line")
+	    systray
+	    index
+	    ;;
+	("off-line")
+	    if [ $CHARGE -gt 20 ]; then
 		systray
-	elif [ $CHARGE -gt 15 ]; then
+	    elif [ $CHARGE -gt 15 ]; then
 		systray
 		while [ $i -le 1 ]; do
-			warning_le20
+		    warning_le20
 		done
-	elif [ $CHARGE -gt 10 ]; then
+	    elif [ $CHARGE -gt 10 ]; then
 		systray
 		while [ $j -le 1 ]; do
-			warning_le15
+		    warning_le15
 		done
-	elif [ $CHARGE -ge 6 ]; then
+	    elif [ $CHARGE -ge 6 ]; then
 		systray
 		while [ $k -le 1 ]; do
-			warning_le10
+		    warning_le10
 		done
-	elif [ $CHARGE -le 5 ]; then
+	    elif [ $CHARGE -le 5 ]; then
 		#As long as charge is less than 5% and we're on battery
 		# gonna display a warning every minute!
 		systray
 		warning_critical
 		c=1
 		for (( c=1; c<=5; c++ )); do
+		    systray
+		    # Wait for $c x 10 seconds...
+		    CHARGE=$(acpi -b | awk -F ", " '{print $2}' | sed 's/%//')
+		    PLUGGED2=$(acpi -a | awk -F ": " '{print $2}')
+		    if [[ "$PLUGGED2" == "on-line" ]]; then
+			# Mains adapter attached in the nick of time! 
+			# Should now be charging... update icon and break loop
 			systray
-			# Wait for $c x 10 seconds...
-			CHARGE=$(acpi -b | awk -F ", " '{print $2}' | sed 's/%//')
-			PLUGGED2=$(acpi -a | awk -F ": " '{print $2}')
-			if [[ "$PLUGGED2" == "on-line" ]]; then
-				# Mains adapter attached in the nick of time! 
-				# Should now be charging... update icon and break loop
-				systray
-				index
-				break
-			fi
-			sleep 10
+			index
+			break
+		    fi
+		    sleep 10
 		done
-	fi
-	;;
-esac
+	    fi
+	    ;;
+    esac
 }
 
 ############################## Start the applet ################################
